@@ -115,7 +115,7 @@ def main():
     else:
         winning_numbers_list.append(user)
         while user.upper() != 'N':
-            user = input("Enter your next raffle ticket number or type 'A' then ENTER to show all winning numbers.\n "
+            user = input("Enter your next raffle ticket number or type 'A' then ENTER to show all winning numbers.\n"
                          "Type 'N' or press ENTER if finished.\n")
             if user.upper() == 'N' or user == '':
                 break

@@ -1,3 +1,6 @@
+# csv
+*.csv
+
 # xml
 .idea
 .com*

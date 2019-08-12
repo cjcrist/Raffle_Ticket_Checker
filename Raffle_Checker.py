@@ -2,12 +2,14 @@
 
 import os
 import sys
-import time
 from datetime import datetime
 
 import pandas as pd
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 # Searches online database for winning numbers for Saturday evening, downloads the csv file, and returns filename.
@@ -15,7 +17,7 @@ def search_dates(url, date):
     options = webdriver.ChromeOptions()
     prefs = {"download.default_directory": os.getcwd()}
     options.add_experimental_option("prefs", prefs)
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(r'{}/{}'.format(os.getcwd(), "chromedriver"), options=options)
     driver.get(url)
     date_selector = driver.find_element_by_class_name("date-range-container ")
     start_date = date_selector.find_element_by_id("startDateId")
@@ -28,21 +30,28 @@ def search_dates(url, date):
     button = driver.find_element_by_class_name("msl-button.msl-button-green")
     button.send_keys(Keys.ENTER)
     csv_fn = ''
-    for i in range(5):
-        time.sleep(3)
-        download = driver.find_element_by_xpath('//*[@id=\"pagination-element-top\"]/div/div[1]/a')
-        download.send_keys(Keys.ENTER)
-        # Gets the name of the csv file
-        csv_fn = download.get_attribute("download")
-        try:
-            if os.path.exists(csv_fn):
-                driver.close()
+    print("Attempting to download the numbers:\n")
+    try:
+        for i in range(3):
+            download = WebDriverWait(driver, 5).until(EC.presence_of_element_located((
+                By.CSS_SELECTOR, '#pagination-element-top > div > div.csv-download > a')))
+            if download:
+                download.send_keys(Keys.ENTER)
+                # Gets the name of the csv file
+                csv_fn = download.get_attribute("download")
                 break
             else:
                 continue
-        except Exception as e:
-            print(str(e))
-            sys.exit(0)
+    except TimeoutError:
+        print("Failed to download numbers by the css selector.")
+        driver.quit()
+        sys.exit(0)
+    try:
+        os.path.exists(csv_fn)
+        driver.close()
+    except Exception as e:
+        print(str(e))
+        sys.exit(0)
     return csv_fn
 
 
@@ -67,9 +76,6 @@ def process_csv(csv_file):
 
 # Checks the user's winning numbers against the csv dictionary and prints the results
 def check_d(d, value_list):
-    if not d:
-        print("There was a problem downloading the winning numbers.")
-        sys.exit(0)
     # Check for A
     for i in value_list:
         if i.upper() == 'A':
@@ -99,6 +105,9 @@ def main():
         raise Exception("Failed to download csv file.")
     # Creates a dictionary of winning numbers
     csv_dict = process_csv(r'{}/{}'.format(os.getcwd(), csv_filename))
+    if not csv_dict:
+        print("There was a problem generating the winning numbers. Please try again.")
+        sys.exit(0)
     # Get user input
     print("This tool was created to check your raffle ticket numbers against the winning numbers in the "
           "Weapon-a-Week Raffle.\n")

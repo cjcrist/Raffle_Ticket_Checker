@@ -13,11 +13,12 @@ To use this project, make sure Chrome is installed on your machine. After, insta
 git clone git@github.com:cjcrist/Raffle_Ticket_Checker.git
 ```
 
-* Move the chromedrive to /usr/local/bin. On OSx or linux:
-    * Drivers for other web browsers can be downloaded [here](https://www.seleniumhq.org/download/)
-
+* ChromeDriver is meant to be run from the project directory on OSx or linux:
+    * Alternatively, drivers for other web browsers can be downloaded [here](https://www.seleniumhq.org/download/)
+			* driver, as well as options() will need to be changed for the alternative driver installed.
+* If running Raffle_Checker.py from a directory other than the git repo:
 ```
-mv chromedriver /usr/local/bin/.
+mv chromedriver /path/to/Raffle_Checker.py.
 ```
 
 * If using different browser, you need to modify the driver and options in the search_dates() function to match your browser.
